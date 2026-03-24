@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: Endurance
+
+  datasource:
+    username: postgres
+    password: root
+    url: jdbc:postgresql://localhost:5432/postgres
+    driver-class-name: org.postgresql.Driver
+
+  session:
+    cookie:
+      name: JSESSIONID
+      path: /
+    timeout: 1h
+    data:
+      redis:
+        host: localhost
+        port: 6379
