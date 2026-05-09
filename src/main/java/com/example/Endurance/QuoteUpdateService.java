@@ -1,5 +1,6 @@
 package com.example.Endurance;
 
+import com.example.Endurance.asset.AssetRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.example.Endurance.asset.AssetEntity;

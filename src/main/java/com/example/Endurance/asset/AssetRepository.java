@@ -1,7 +1,7 @@
-package com.example.Endurance;
+package com.example.Endurance.asset;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import com.example.Endurance.asset.AssetEntity;
+
 import java.util.Optional;
 
 public interface AssetRepository extends JpaRepository<AssetEntity, Long> {

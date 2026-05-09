@@ -1,6 +1,5 @@
 package com.example.Endurance.asset;
 
-import com.example.Endurance.AssetCategoryEntity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

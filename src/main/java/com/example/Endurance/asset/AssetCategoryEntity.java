@@ -1,4 +1,4 @@
-package com.example.Endurance;
+package com.example.Endurance.asset;
 
 import jakarta.persistence.*;
 import lombok.Getter;
