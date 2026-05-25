@@ -500,7 +500,88 @@ async function loadMainChartRate(ticker = "USD/RUB") {
     }
 }
 
+const LESSON_DETAILS = {
+    lesson1: {
+        title: "Урок 1. Что такое валютный курс",
+        text: "Валютный курс показывает соотношение стоимости двух валют. В проекте используются валютные пары USD/RUB и EUR/RUB. Первая валюта в паре является покупаемым активом, а вторая валюта показывает, в чём выражена цена. Например, USD/RUB показывает, сколько рублей стоит один доллар США. Если курс равен 90, то покупка 10 долларов будет стоить 900 рублей. В симуляторе эта сумма списывается с виртуального рублёвого баланса пользователя."
+    },
+    lesson2: {
+        title: "Урок 2. Что такое инвестиционный портфель",
+        text: "Инвестиционный портфель в системе представляет собой виртуальный набор активов пользователя. Он содержит свободные денежные средства и купленные позиции. Когда пользователь покупает валютный актив, свободный баланс уменьшается, а в таблице позиций появляется запись о количестве купленной валюты и средней цене покупки. Благодаря этому пользователь может отслеживать состояние своего портфеля после каждой операции."
+    },
+    lesson3: {
+        title: "Урок 3. Как рассчитывается результат сделки",
+        text: "Финансовый результат позиции рассчитывается на основе разницы между текущим курсом и средней ценой покупки. Если текущий курс выше средней цены покупки, позиция показывает положительный результат. Если текущий курс ниже средней цены покупки, возникает отрицательный результат. Например, если пользователь купил 10 USD по 90 RUB, а текущий курс стал 92 RUB, то условная прибыль составит 20 RUB."
+    }
+};
 
+function openLessonDetails(lessonKey) {
+    const lesson = LESSON_DETAILS[lessonKey];
+
+    if (!lesson) {
+        return;
+    }
+
+    setText("lessonDetailsTitle", lesson.title);
+    setText("lessonDetailsText", lesson.text);
+
+    const section = document.getElementById("lessonDetailsSection");
+
+    if (section) {
+        section.classList.remove("hidden");
+        section.scrollIntoView({
+            behavior: "smooth",
+            block: "start"
+        });
+    }
+}
+
+function checkLearningTest() {
+    const questionNames = ["q1", "q2", "q3"];
+    let correctAnswers = 0;
+    let answeredQuestions = 0;
+
+    questionNames.forEach(name => {
+        const selectedAnswer = document.querySelector(`input[name="${name}"]:checked`);
+
+        if (selectedAnswer) {
+            answeredQuestions++;
+
+            if (selectedAnswer.value === "correct") {
+                correctAnswers++;
+            }
+        }
+    });
+
+    const resultBlock = document.getElementById("quizResult");
+
+    if (!resultBlock) {
+        return;
+    }
+
+    resultBlock.classList.remove("hidden", "success", "warning", "error");
+
+    if (answeredQuestions < questionNames.length) {
+        resultBlock.classList.add("warning");
+        resultBlock.textContent = "Ответьте на все вопросы теста.";
+        return;
+    }
+
+    if (correctAnswers === questionNames.length) {
+        resultBlock.classList.add("success");
+        resultBlock.textContent = `Тест пройден успешно. Правильных ответов: ${correctAnswers} из ${questionNames.length}.`;
+        return;
+    }
+
+    if (correctAnswers >= 2) {
+        resultBlock.classList.add("warning");
+        resultBlock.textContent = `Тест почти пройден. Правильных ответов: ${correctAnswers} из ${questionNames.length}. Повторите материал и попробуйте снова.`;
+        return;
+    }
+
+    resultBlock.classList.add("error");
+    resultBlock.textContent = `Тест не пройден. Правильных ответов: ${correctAnswers} из ${questionNames.length}. Рекомендуется повторить уроки.`;
+}
 
 function formatNumber(value) {
     if (value === null || value === undefined || value === "") {
@@ -634,12 +715,166 @@ async function initDashboardPage() {
     setInterval(() => {
         loadMainChartRate("USD/RUB");
     }, 10000);
-} 
+}
+
+async function loadProfileUser() {
+    try {
+        const user = await request("/api/user/me", {
+            method: "GET"
+        });
+
+        setText("profileUserId", user.id);
+        setText("profileUserName", user.username || user.name || "Пользователь");
+        setText("profileName", user.username || user.name || "Пользователь");
+        setText("profileUserEmail", user.email || "Email не указан");
+        setText("profileEmail", user.email || "Email не указан");
+        setText("profileRole", user.role || user.roles || "USER");
+        setText("profileStatus", "Активен");
+
+        return user;
+    } catch (error) {
+        console.error("Ошибка загрузки профиля:", error);
+
+        setText("profileUserName", "Пользователь не найден");
+        setText("profileUserEmail", "Не удалось получить данные аккаунта");
+        setText("profileUserId", "-");
+        setText("profileName", "-");
+        setText("profileEmail", "-");
+        setText("profileRole", "-");
+        setText("profileStatus", "Ошибка");
+
+        return null;
+    }
+}
+
+async function loadProfilePortfolio() {
+    try {
+        const portfolio = await request("/api/portfolio", {
+            method: "GET"
+        });
+
+        setText("profilePortfolioName", portfolio.name || "Основной портфель");
+        setText("profilePortfolioCurrency", portfolio.currency || "RUB");
+        setText("profileStartBalance", formatMoney(portfolio.startBalance, portfolio.currency));
+        setText("profileCashBalance", formatMoney(portfolio.cashBalance, portfolio.currency));
+
+        return portfolio;
+    } catch (error) {
+        console.error("Ошибка загрузки портфеля профиля:", error);
+
+        setText("profilePortfolioName", "-");
+        setText("profilePortfolioCurrency", "-");
+        setText("profileStartBalance", "-");
+        setText("profileCashBalance", "-");
+
+        return null;
+    }
+}
+
+async function loadProfilePositions() {
+    try {
+        const positions = await request("/api/positions", {
+            method: "GET"
+        });
+
+        let totalValue = 0;
+        let totalProfit = 0;
+
+        if (positions && positions.length > 0) {
+            positions.forEach(position => {
+                totalValue += Number(position.currentValue || 0);
+                totalProfit += Number(position.profit || 0);
+            });
+        }
+
+        setText("profilePositionsCount", positions ? positions.length : 0);
+        setText("profilePositionsValue", formatNumber(totalValue));
+        setText("profileProfit", formatProfit(totalProfit));
+
+        const profitElement = document.getElementById("profileProfit");
+
+        if (profitElement) {
+            profitElement.className = "big " + getProfitClass(totalProfit);
+        }
+
+        return positions;
+    } catch (error) {
+        console.error("Ошибка загрузки активов профиля:", error);
+
+        setText("profilePositionsCount", "-");
+        setText("profilePositionsValue", "-");
+        setText("profileProfit", "-");
+
+        return [];
+    }
+}
+
+async function loadProfileTransactions() {
+    const tbody = document.getElementById("profileTransactionsBody");
+
+    if (!tbody) {
+        return [];
+    }
+
+    try {
+        const transactions = await request("/api/transactions", {
+            method: "GET"
+        });
+
+        setText("profileTransactionsCount", transactions ? transactions.length : 0);
+
+        tbody.innerHTML = "";
+
+        if (!transactions || transactions.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6">Операции пока отсутствуют</td>
+                </tr>
+            `;
+            return [];
+        }
+
+        const lastTransactions = transactions.slice(0, 5);
+
+        lastTransactions.forEach(transaction => {
+            const row = document.createElement("tr");
+
+            row.innerHTML = `
+                <td>${formatDateTime(transaction.ts)}</td>
+                <td>${transaction.ticker || "-"}</td>
+                <td><span class="badge buy">${transaction.type || "-"}</span></td>
+                <td>${formatNumber(transaction.qty)}</td>
+                <td>${formatNumber(transaction.price)}</td>
+                <td>${formatNumber(transaction.fee)}</td>
+            `;
+
+            tbody.appendChild(row);
+        });
+
+        return transactions;
+    } catch (error) {
+        console.error("Ошибка загрузки операций профиля:", error);
+
+        setText("profileTransactionsCount", "-");
+
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="6">Не удалось загрузить операции</td>
+            </tr>
+        `;
+
+        return [];
+    }
+}
 
 async function initProfilePage() {
+    await loadProfilePortfolio();
+    await loadProfileUser();
     await loadCurrentUser();
     await loadPortfolio();
     await loadTransactions();
+    await loadProfilePositions();
+    await loadProfileTransactions();
 }
 
 async function initCourseChartPage() {
