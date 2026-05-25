@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход | Endurance</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-page">
+
+<header class="auth-header">
+    <div class="logo">Endurance</div>
+    <a href="register.html">Создать аккаунт</a>
+</header>
+
+<main class="auth-wrapper">
+    <section class="auth-panel">
+        <div class="auth-info">
+            <h1>Вход в инвестиционный симулятор</h1>
+            <p>
+                Авторизуйтесь, чтобы перейти в личный кабинет, просмотреть портфель,
+                актуальные валютные курсы и историю операций.
+            </p>
+
+            <div class="auth-features">
+                <div>
+                    <strong>Учебный режим</strong>
+                    <span>Материалы и тесты по основам инвестирования</span>
+                </div>
+
+                <div>
+                    <strong>Виртуальный портфель</strong>
+                    <span>Покупка валютных активов без финансового риска</span>
+                </div>
+
+                <div>
+                    <strong>Актуальные курсы</strong>
+                    <span>Получение курса USD/RUB через внешний API</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-form-card">
+            <h2>Войти в аккаунт</h2>
+            <p class="form-subtitle">Введите данные, указанные при регистрации</p>
+
+            <form>
+                <label>Email</label>
+                <input id="loginEmail" type="email" placeholder="user@mail.com">
+
+                <label>Пароль</label>
+                <input id="loginPassword" type="password" placeholder="Введите пароль">
+
+                <button type="button" onclick="loginUser()">Войти</button>
+            </form>
+
+            <p class="auth-link">
+                Нет аккаунта?
+                <a href="register.html">Зарегистрироваться</a>
+            </p>
+        </div>
+    </section>
+</main>
+
+<script src="/script.js"></script>
+
+</body>
+</html>

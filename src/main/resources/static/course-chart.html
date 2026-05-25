@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>График курса | Endurance</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="logo">Endurance</div>
+    <nav>
+        <a href="index.html#dashboard">Главная</a>
+        <a href="profile.html">Профиль</a>
+        <a href="index.html#assets">Активы</a>
+        <a href="index.html#portfolio">Портфель</a>
+        <a href="index.html#transactions">Операции</a>
+        <a href="learning.html">Обучение</a>
+        <a href="login.html">Выход</a>
+    </nav>
+</header>
+
+<main class="container">
+
+    <section class="dashboard">
+        <h1>График изменения курса</h1>
+        <p class="subtitle">
+            На странице отображается история изменения валютного курса, сохранённая в таблице котировок.
+            В рабочей версии данные будут загружаться из endpoint’а backend API.
+        </p>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Актив</h3>
+                <p class="big">USD/RUB</p>
+                <span>Доллар США к российскому рублю</span>
+            </div>
+
+            <div class="card">
+                <h3>Текущий курс</h3>
+                <p class="big">91.42</p>
+                <span>Последняя котировка из базы данных</span>
+            </div>
+
+            <div class="card">
+                <h3>Изменение за период</h3>
+                <p class="big positive">+1.24%</p>
+                <span>По сравнению с началом периода</span>
+            </div>
+
+            <div class="card">
+                <h3>Источник данных</h3>
+                <p class="big">API</p>
+                <span>Курс обновляется через внешний сервис</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Динамика курса USD/RUB</h2>
+
+        <div class="line-chart-card">
+            <div class="chart-top">
+                <div>
+                    <h3>USD/RUB</h3>
+                    <p>История котировок за последние обновления</p>
+                </div>
+
+                <div class="chart-current">
+                    <span>Последнее значение</span>
+                    <strong>91.42 RUB</strong>
+                </div>
+            </div>
+
+            <div class="line-chart">
+                <svg viewBox="0 0 900 320" preserveAspectRatio="none">
+                    <line x1="50" y1="20" x2="50" y2="280" class="axis-line"/>
+                    <line x1="50" y1="280" x2="860" y2="280" class="axis-line"/>
+
+                    <line x1="50" y1="80" x2="860" y2="80" class="grid-line"/>
+                    <line x1="50" y1="140" x2="860" y2="140" class="grid-line"/>
+                    <line x1="50" y1="200" x2="860" y2="200" class="grid-line"/>
+
+                    <polyline
+                            points="70,230 190,210 310,220 430,160 550,175 670,110 790,130"
+                            class="chart-line"
+                    />
+
+                    <circle cx="70" cy="230" r="6" class="chart-point"/>
+                    <circle cx="190" cy="210" r="6" class="chart-point"/>
+                    <circle cx="310" cy="220" r="6" class="chart-point"/>
+                    <circle cx="430" cy="160" r="6" class="chart-point"/>
+                    <circle cx="550" cy="175" r="6" class="chart-point"/>
+                    <circle cx="670" cy="110" r="6" class="chart-point"/>
+                    <circle cx="790" cy="130" r="6" class="chart-point"/>
+
+                    <text x="10" y="85" class="chart-text">92.0</text>
+                    <text x="10" y="145" class="chart-text">91.5</text>
+                    <text x="10" y="205" class="chart-text">91.0</text>
+                    <text x="10" y="285" class="chart-text">90.5</text>
+                </svg>
+            </div>
+
+            <div class="chart-days">
+                <span>Пн</span>
+                <span>Вт</span>
+                <span>Ср</span>
+                <span>Чт</span>
+                <span>Пт</span>
+                <span>Сб</span>
+                <span>Вс</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Таблица котировок</h2>
+
+        <table>
+            <thead>
+            <tr>
+                <th>Дата и время</th>
+                <th>Актив</th>
+                <th>Курс</th>
+                <th>Источник</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>11.05.2026 10:00</td>
+                <td>USD/RUB</td>
+                <td>90.85</td>
+                <td>Currency API</td>
+            </tr>
+            <tr>
+                <td>11.05.2026 11:00</td>
+                <td>USD/RUB</td>
+                <td>91.10</td>
+                <td>Currency API</td>
+            </tr>
+            <tr>
+                <td>11.05.2026 12:00</td>
+                <td>USD/RUB</td>
+                <td>91.42</td>
+                <td>Currency API</td>
+            </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section class="section">
+        <div class="deal-actions">
+            <button onclick="window.location.href='buy-asset.html'">
+                Купить USD/RUB
+            </button>
+
+            <button class="outline-btn" onclick="window.location.href='index.html#assets'">
+                Вернуться к активам
+            </button>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <p>Игровой симулятор инвестиционного рынка · График валютного курса</p>
+</footer>
+
+<script src="/script.js"></script>
+<script>
+    initCourseChartPage();
+</script>
+
+</body>
+</html>

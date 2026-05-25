@@ -18,20 +18,26 @@ public class CurrencyRateClient {
     }
 
     public BigDecimal getRate(String from, String to) {
-        FrankfurterResponse response = webClient.get()
+        FrankfurterResponse[] response = webClient.get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/v1/latest")
+                        .path("/v2/rates")
                         .queryParam("base", from)
-                        .queryParam("symbols", to)
+                        .queryParam("quotes", to)
                         .build())
                 .retrieve()
-                .bodyToMono(FrankfurterResponse.class)
+                .bodyToMono(FrankfurterResponse[].class)
                 .block();
 
-        if (response == null || response.rates() == null || !response.rates().containsKey(to)) {
+        if (response == null || response.length == 0) {
+            throw new RuntimeException("Пустой ответ от API курсов валют");
+        }
+
+        FrankfurterResponse first = response[0];
+
+        if (first.rate() == null) {
             throw new RuntimeException("Не удалось получить курс " + from + "/" + to);
         }
 
-        return response.rates().get(to);
+        return first.rate();
     }
 }

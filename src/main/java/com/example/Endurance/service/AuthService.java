@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Service
@@ -25,8 +26,8 @@ public class AuthService {
 
     @Transactional
     public RegisterResponse register(RegisterRequest req) {
-        if (userRepository.existsUserEntiesByName(req.username())) {
-            throw new RuntimeException("Username is already in use " + req.username() + " already exists");
+        if (userRepository.existsUserEntiesByEmail(req.email())) {
+            throw new RuntimeException("Email is already in use " + req.email() + " already exists");
         }
         String hash = passwordEncoder.encode(req.password());
         UserEntity entity = new UserEntity();
@@ -38,9 +39,9 @@ public class AuthService {
         PortfolioEntity portfolioEntity = new PortfolioEntity();
         portfolioEntity.setUser(entity);
         portfolioEntity.setName("Основной портфель");
-        portfolioEntity.setCurrency("USD");
-        portfolioEntity.setStartBalance(10000.00);
-        portfolioEntity.setCashBalance(10000.00);
+        portfolioEntity.setCurrency("RUB");
+        portfolioEntity.setStartBalance(new BigDecimal("10000.00"));
+        portfolioEntity.setCashBalance(new BigDecimal("10000.00"));
         portfolioEntity.setCreatedAt(Instant.now());
 
         UserEntity saved = userRepository.save(entity);
@@ -68,7 +69,7 @@ public class AuthService {
 
     @Transactional
     public User login(LoginRequest req) {
-        UserEntity saved = userRepository.findByName(req.username())
+        UserEntity saved = userRepository.findByEmail(req.email())
                 .orElseThrow(() -> new RuntimeException("User not found"));
         return userMapper.toDomain(saved);
     }

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Setter
@@ -24,15 +25,15 @@ public class PortfolioEntity {
     @Column(name = "currency")
     private String currency;
     @Column(name = "start_balance")
-    private Double startBalance;
+    private BigDecimal startBalance;
     @Column(name = "cash_balance")
-    private Double cashBalance;
+    private BigDecimal cashBalance;
     @Column(name = "created_at")
     private Instant createdAt;
 
     public PortfolioEntity() {}
 
-    public PortfolioEntity(Long id, UserEntity user, String name, String currency, Double startBalance, Double cashBalance, Instant createdAt) {
+    public PortfolioEntity(Long id, UserEntity user, String name, String currency, BigDecimal startBalance, BigDecimal cashBalance, Instant createdAt) {
         this.id = id;
         this.user = user;
         this.name = name;

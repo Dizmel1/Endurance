@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Результат сделки | Endurance</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="logo">Endurance</div>
+    <nav>
+        <a href="index.html#dashboard">Главная</a>
+        <a href="profile.html">Профиль</a>
+        <a href="index.html#assets">Активы</a>
+        <a href="index.html#portfolio">Портфель</a>
+        <a href="index.html#transactions">Операции</a>
+        <a href="learning.html">Обучение</a>
+        <a href="login.html">Выход</a>
+    </nav>
+</header>
+
+<main class="container">
+
+    <section class="section">
+        <h2>Результат выполнения операции</h2>
+
+        <div class="success-card">
+            <div class="success-icon">✓</div>
+
+            <div>
+                <h3>Операция покупки успешно выполнена</h3>
+                <p>
+                    Сделка была обработана сервером, после чего система обновила состояние портфеля,
+                    создала или изменила позицию по активу и сохранила транзакцию в истории операций.
+                </p>
+
+                <div class="result-grid">
+                    <div>
+                        <span>Тип операции</span>
+                        <strong id="dealType">Загрузка...</strong>
+                    </div>
+
+                    <div>
+                        <span>Актив</span>
+                        <strong id="dealTicker">Загрузка...</strong>
+                    </div>
+
+                    <div>
+                        <span>Количество</span>
+                        <strong id="dealQty">Загрузка...</strong>
+                    </div>
+
+                    <div>
+                        <span>Цена покупки</span>
+                        <strong id="dealPrice">Загрузка...</strong>
+                    </div>
+
+                    <div>
+                        <span>Комиссия</span>
+                        <strong id="dealFee">Загрузка...</strong>
+                    </div>
+
+                    <div>
+                        <span>Сумма сделки</span>
+                        <strong id="dealTotal">Загрузка...</strong>
+                    </div>
+
+                    <div>
+                        <span>Дата операции</span>
+                        <strong id="dealDate">Загрузка...</strong>
+                    </div>
+
+                    <div>
+                        <span>ID транзакции</span>
+                        <strong id="dealTransactionId">Загрузка...</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    <section class="section">
+        <h2>Актуальное состояние портфеля</h2>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Название портфеля</h3>
+                <p id="resultPortfolioName">Загрузка...</p>
+                <span>Портфель текущего пользователя</span>
+            </div>
+
+            <div class="card">
+                <h3>Валюта портфеля</h3>
+                <p id="resultPortfolioCurrency" class="big">Загрузка...</p>
+                <span>Базовая валюта</span>
+            </div>
+
+            <div class="card">
+                <h3>Стартовый баланс</h3>
+                <p id="resultStartBalance" class="big">Загрузка...</p>
+                <span>Начальная сумма</span>
+            </div>
+
+            <div class="card">
+                <h3>Свободные средства</h3>
+                <p id="resultCashBalance" class="big">Загрузка...</p>
+                <span>После выполнения сделки</span>
+            </div>
+        </div>
+    </section>
+
+
+<!--    <section class="section">-->
+<!--        <h2>Обновлённое состояние портфеля</h2>-->
+
+<!--        <table>-->
+<!--            <thead>-->
+<!--            <tr>-->
+<!--                <th>Актив</th>-->
+<!--                <th>Количество</th>-->
+<!--                <th>Средняя цена</th>-->
+<!--                <th>Текущая стоимость</th>-->
+<!--                <th>Статус</th>-->
+<!--            </tr>-->
+<!--            </thead>-->
+<!--            <tbody>-->
+<!--            <tr>-->
+<!--                <td>USD/RUB</td>-->
+<!--                <td>10.00</td>-->
+<!--                <td>91.42 RUB</td>-->
+<!--                <td>914.20 RUB</td>-->
+<!--                <td><span class="badge buy">Актив куплен</span></td>-->
+<!--            </tr>-->
+<!--            </tbody>-->
+<!--        </table>-->
+<!--    </section>-->
+
+    <section class="section">
+        <div class="actions-row">
+            <button class="confirm-btn" onclick="window.location.href='/index.html#assets'">
+                Купить другой актив
+            </button>
+
+            <button class="outline-btn" onclick="window.location.href='/index.html#transactions'">
+                Перейти к истории операций
+            </button>
+
+            <button class="outline-btn" onclick="window.location.href='/index.html#portfolio'">
+                Открыть портфель
+            </button>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <p>Игровой симулятор инвестиционного рынка · Результат сделки</p>
+</footer>
+
+<script src="/script.js"></script>
+<script>
+    loadDealResult();
+</script>
+
+</body>
+</html>

@@ -1,4 +1,4 @@
-package com.example.Endurance;
+package com.example.Endurance.quote;
 
 import com.example.Endurance.asset.AssetEntity;
 import jakarta.persistence.*;
@@ -18,7 +18,6 @@ public class QuoteEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // В БД это asset_id
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "asset_id", nullable = false)
     private AssetEntity asset;

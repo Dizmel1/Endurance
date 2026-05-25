@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Регистрация | Endurance</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="auth-page">
+
+<header class="auth-header">
+    <div class="logo">Endurance</div>
+    <a href="login.html">Войти</a>
+</header>
+
+<main class="auth-wrapper">
+    <section class="auth-panel">
+        <div class="auth-info">
+            <h1>Создание аккаунта</h1>
+            <p>
+                После регистрации система автоматически создаст стартовый инвестиционный портфель
+                с виртуальным балансом для выполнения учебных операций.
+            </p>
+
+            <div class="auth-features">
+                <div>
+                    <strong>Стартовый баланс</strong>
+                    <span>Пользователь получает виртуальные средства для торговли</span>
+                </div>
+
+                <div>
+                    <strong>Портфель</strong>
+                    <span>Автоматическое создание основного портфеля</span>
+                </div>
+
+                <div>
+                    <strong>Обучение</strong>
+                    <span>Доступ к учебным материалам и тестовым заданиям</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-form-card">
+            <h2>Регистрация</h2>
+            <p class="form-subtitle">Заполните данные для создания аккаунта</p>
+
+            <form>
+                <label>Имя</label>
+                <input id="registerName" type="text" placeholder="Введите имя">
+
+                <label>Email</label>
+                <input id="registerEmail" type="email" placeholder="user@mail.com">
+
+                <label>Пароль</label>
+                <input id="registerPassword" type="password" placeholder="Придумайте пароль">
+
+                <button type="button" onclick="registerUser()">Создать аккаунт</button>
+            </form>
+
+            <p class="auth-link">
+                Уже есть аккаунт?
+                <a href="login.html">Войти</a>
+            </p>
+        </div>
+    </section>
+</main>
+
+<script src="/script.js"></script>
+
+</body>
+</html>

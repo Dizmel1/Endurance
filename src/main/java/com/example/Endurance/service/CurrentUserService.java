@@ -1,5 +1,6 @@
 package com.example.Endurance.service;
 
+import com.example.Endurance.user.UserEntity;
 import com.example.Endurance.user.UserRepository;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -14,8 +15,23 @@ public class CurrentUserService {
     }
     public Long getUserId() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        String username = auth.getName();
-        return userRepository.findByName(username)
+        String email = auth.getName();
+        return userRepository.findByEmail(email)
                 .orElseThrow().getId();
+    }
+
+    public UserEntity getCurrentUser() {
+        Authentication authentication = SecurityContextHolder
+                .getContext()
+                .getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("Пользователь не авторизован");
+        }
+
+        String email = authentication.getName();
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Текущий пользователь не найден"));
     }
 }

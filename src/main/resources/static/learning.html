@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Обучение | Endurance</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="logo">Endurance</div>
+    <nav>
+        <a href="index.html#dashboard">Главная</a>
+        <a href="profile.html">Профиль</a>
+        <a href="index.html#assets">Активы</a>
+        <a href="index.html#portfolio">Портфель</a>
+        <a href="index.html#transactions">Операции</a>
+        <a href="learning.html">Обучение</a>
+    </nav>
+</header>
+
+<main class="container">
+
+    <section class="dashboard">
+        <h1>Обучающий модуль</h1>
+        <p class="subtitle">
+            Перед выполнением торговых операций пользователь может изучить базовые понятия валютного рынка,
+            пройти небольшой тест и закрепить знания на практике.
+        </p>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Пройдено уроков</h3>
+                <p class="big">1 из 3</p>
+                <span>Текущий прогресс</span>
+            </div>
+
+            <div class="card">
+                <h3>Тестирование</h3>
+                <p class="big">0%</p>
+                <span>Тест ещё не завершён</span>
+            </div>
+
+            <div class="card">
+                <h3>Практическое задание</h3>
+                <p class="big">Доступно</p>
+                <span>Покупка валютного актива</span>
+            </div>
+
+            <div class="card">
+                <h3>Статус обучения</h3>
+                <p class="big">В процессе</p>
+                <span>Продолжите изучение</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Учебные материалы</h2>
+
+        <div class="learning-grid">
+            <div class="lesson-card">
+                <span class="lesson-status completed">Пройдено</span>
+                <h3>Урок 1. Что такое валютный курс?</h3>
+                <p>
+                    Валютный курс показывает стоимость одной валюты, выраженную в другой валюте.
+                    Например, значение USD/RUB = 91.42 означает, что один доллар США стоит 91.42 рубля.
+                </p>
+                <button>Повторить материал</button>
+            </div>
+
+            <div class="lesson-card">
+                <span class="lesson-status">В процессе</span>
+                <h3>Урок 2. Как формируется портфель?</h3>
+                <p>
+                    Портфель содержит свободные денежные средства пользователя и купленные активы.
+                    После покупки валюты уменьшается свободный баланс и появляется новая позиция.
+                </p>
+                <button>Открыть материал</button>
+            </div>
+
+            <div class="lesson-card">
+                <span class="lesson-status locked">Не начато</span>
+                <h3>Урок 3. Доходность и риск</h3>
+                <p>
+                    Доходность показывает изменение стоимости портфеля, а риск связан с возможным изменением курса
+                    в неблагоприятную для пользователя сторону.
+                </p>
+                <button>Начать урок</button>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Краткий учебный материал</h2>
+
+        <div class="theory-card">
+            <h3>Пример: покупка валютного актива</h3>
+
+            <p>
+                Допустим, у пользователя есть стартовый баланс 10 000 USD. Он выбирает актив USD/RUB
+                и покупает 10 единиц по текущему курсу 91.42. Система рассчитывает стоимость сделки,
+                уменьшает свободный баланс портфеля и сохраняет операцию в истории транзакций.
+            </p>
+
+            <div class="formula-box">
+                Стоимость сделки = количество × текущая цена + комиссия
+            </div>
+
+            <p>
+                После выполнения сделки информация сохраняется в двух таблицах: в таблице позиций отражается
+                текущее состояние портфеля, а в таблице транзакций сохраняется история операции.
+            </p>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Проверка знаний</h2>
+
+        <div class="quiz-preview">
+            <h3>Тест по теме “Валютный курс”</h3>
+            <p>Что означает курс USD/RUB = 91.42?</p>
+
+            <label>
+                <input type="radio" name="q1">
+                Один рубль стоит 91.42 доллара
+            </label>
+
+            <label>
+                <input type="radio" name="q1" checked>
+                Один доллар стоит 91.42 рубля
+            </label>
+
+            <label>
+                <input type="radio" name="q1">
+                Пользователь заработал 91.42 рубля
+            </label>
+
+            <button>Ответить</button>
+            <button class="outline-btn">Перейти к полному тесту</button>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Практическое задание</h2>
+
+        <div class="task-card">
+            <div>
+                <span class="lesson-status">Задание</span>
+                <h3>Купить валютный актив по текущему курсу</h3>
+                <p>
+                    Пользователю необходимо изучить текущий курс USD/RUB, выполнить покупку актива
+                    и проверить изменение портфеля в разделе “История операций”.
+                </p>
+            </div>
+
+            <div class="task-actions">
+                <button>Перейти к активам</button>
+                <button class="outline-btn">Посмотреть портфель</button>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <p>Игровой симулятор инвестиционного рынка · Обучающий модуль</p>
+</footer>
+
+</body>
+</html>

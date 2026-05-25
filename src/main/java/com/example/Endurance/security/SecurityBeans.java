@@ -21,15 +21,15 @@ public class SecurityBeans {
 
     @Bean
     UserDetailsService userDetailsService(UserRepository users){
-        return username -> {
-            var u = users.findByEmail(username)
-                    .orElseThrow(() -> new UsernameNotFoundException("User " + username + " not found"));
+        return email -> {
+            var u = users.findByEmail(email)
+                    .orElseThrow(() -> new UsernameNotFoundException("User " + email + " not found"));
 
             var roles = (u.getRoles() != null) ? u.getRoles() : Roles.USER;
             var auths = List.of(new SimpleGrantedAuthority("ROLE_" + roles.name()));
 
             return new org.springframework.security.core.userdetails.User(
-                    u.getName(),
+                    u.getEmail(),
                     u.getPassword(),
                     auths
             );

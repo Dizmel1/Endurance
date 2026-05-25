@@ -3,6 +3,7 @@ package com.example.Endurance.dto;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 public record Portfolio(
@@ -15,9 +16,9 @@ public record Portfolio(
         @NotNull
         String currency,
         @NotNull
-        Double startBalance,
+        BigDecimal startBalance,
         @NotNull
-        Double cashBalance,
+        BigDecimal cashBalance,
         @NotNull
         Instant createdAt
 ) {

@@ -1,5 +1,6 @@
-package com.example.Endurance;
+package com.example.Endurance.quote;
 
+import com.example.Endurance.CurrencyRateClient;
 import com.example.Endurance.asset.AssetRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;

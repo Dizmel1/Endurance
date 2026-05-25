@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Мои активы</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="logo">Endurance</div>
+
+    <nav class="nav">
+        <a href="/index.html">Главная</a>
+        <a href="/positions.html" class="active">Мои активы</a>
+        <a href="/profile.html">Профиль</a>
+        <a href="/learning.html">Обучение</a>
+        <button class="logout-btn" onclick="logoutUser()">Выйти</button>
+    </nav>
+</header>
+
+<main class="container">
+
+    <section class="section">
+        <div class="section-header">
+            <div>
+                <span class="lesson-status">Портфель</span>
+                <h1>Мои активы</h1>
+                <p>
+                    На этой странице отображаются активы, которые были куплены пользователем.
+                    Данные загружаются из базы данных и отражают текущее состояние портфеля.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Сводка по активам</h2>
+
+        <div class="cards">
+            <div class="card">
+                <h3>Количество позиций</h3>
+                <p id="positionsCount" class="big">Загрузка...</p>
+                <span>Активов в портфеле</span>
+            </div>
+
+            <div class="card">
+                <h3>Общая стоимость</h3>
+                <p id="positionsTotalValue" class="big">Загрузка...</p>
+                <span>По текущему курсу</span>
+            </div>
+
+            <div class="card">
+                <h3>Финансовый результат</h3>
+                <p id="positionsTotalProfit" class="big">Загрузка...</p>
+                <span>Прибыль или убыток</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <h2>Купленные активы</h2>
+
+        <div class="table-wrapper">
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>Актив</th>
+                    <th>Название</th>
+                    <th>Количество</th>
+                    <th>Средняя цена</th>
+                    <th>Текущий курс</th>
+                    <th>Стоимость позиции</th>
+                    <th>Результат</th>
+                    <th>Действие</th>
+                </tr>
+                </thead>
+
+                <tbody id="positionsTableBody">
+                <tr>
+                    <td colspan="8">Загрузка купленных активов...</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="actions-row">
+            <button class="confirm-btn" onclick="window.location.href='/index.html#assets'">
+                Купить другой актив
+            </button>
+
+            <button class="outline-btn" onclick="window.location.href='/index.html#transactions'">
+                История операций
+            </button>
+
+            <button class="outline-btn" onclick="window.location.href='/index.html'">
+                На главную
+            </button>
+        </div>
+    </section>
+
+</main>
+
+<script src="/script.js"></script>
+<script>
+    initPositionsPage();
+</script>
+
+</body>
+</html>

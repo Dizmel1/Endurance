@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Покупка актива | Endurance</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="header">
+    <div class="logo">Endurance</div>
+    <nav>
+        <a href="index.html#dashboard">Главная</a>
+        <a href="profile.html">Профиль</a>
+        <a href="index.html#assets">Активы</a>
+        <a href="index.html#portfolio">Портфель</a>
+        <a href="index.html#transactions">Операции</a>
+        <a href="learning.html">Обучение</a>
+        <a href="login.html">Выход</a>
+    </nav>
+</header>
+
+<main class="container">
+
+    <section class="dashboard">
+        <h1>Покупка валютного актива</h1>
+        <p class="subtitle">
+            На данной странице пользователь выбирает количество валютного актива и подтверждает учебную сделку.
+            Расчёт стоимости выполняется на основе актуального курса, сохранённого в базе данных.
+        </p>
+    </section>
+
+    <section class="buy-layout">
+
+        <div class="buy-card">
+            <div class="asset-title">
+                <div>
+                    <span class="lesson-status">Валютный актив</span>
+                    <h2 id="buyAssetTicker">Загрузка...</h2>
+                    <p id="buyAssetName">Загрузка данных об активе</p>
+                </div>
+
+                <div class="asset-rate">
+                    <span>Текущий курс</span>
+                    <strong id="buyAssetRate">Загрузка...</strong>
+                </div>
+            </div>
+
+            <div class="buy-form">
+                <label>Количество для покупки</label>
+                <input id="buyQty" type="number" value="10" min="1">
+
+                <label>Цена за единицу</label>
+                <input id="buyPriceInput" type="text" value="Загрузка..." readonly>
+
+                <label>Комиссия</label>
+                <input id="buyFeeInput" type="text" value="0.00" readonly>
+
+                <div class="calculation-box">
+                    <div>
+                        <span>Количество</span>
+                        <strong id="buyQtyView">10.00</strong>
+                    </div>
+
+                    <div>
+                        <span>Цена</span>
+                        <strong id="buyPriceView">Загрузка...</strong>
+                    </div>
+
+                    <div>
+                        <span>Сумма сделки</span>
+                        <strong id="buyTotalView">Загрузка...</strong>
+                    </div>
+                </div>
+
+                <button class="confirm-btn" onclick="buyAsset()">Подтвердить покупку</button>
+
+                <button class="outline-btn" onclick="window.location.href='/index.html#assets'">
+                    Вернуться к активам
+                </button>
+            </div>
+        </div>
+
+        <aside class="buy-sidebar">
+            <div class="side-card">
+                <h3>Портфель</h3>
+
+                <div class="side-row">
+                    <span>Название</span>
+                    <strong id="buyPortfolioName">Загрузка...</strong>
+                </div>
+
+                <div class="side-row">
+                    <span>Валюта</span>
+                    <strong id="buyPortfolioCurrency">Загрузка...</strong>
+                </div>
+
+                <div class="side-row">
+                    <span>Свободные средства</span>
+                    <strong id="buyPortfolioCash">Загрузка...</strong>
+                </div>
+
+                <div class="side-row">
+                    <span>Стартовый баланс</span>
+                    <strong id="buyPortfolioStart">Загрузка...</strong>
+                </div>
+            </div>
+
+            <div class="side-card">
+                <h3>Что произойдёт после покупки?</h3>
+
+                <ul class="buy-steps">
+                    <li>Из свободного баланса будет списана сумма сделки.</li>
+                    <li>В таблице позиций появится купленный актив.</li>
+                    <li>В истории операций будет создана транзакция типа BUY.</li>
+                    <li>Средняя цена покупки будет сохранена для расчёта результата.</li>
+                </ul>
+            </div>
+        </aside>
+
+    </section>
+
+    <section class="section">
+        <h2>Результат выполнения операции</h2>
+
+        <div class="success-card">
+            <div class="success-icon">✓</div>
+
+            <div>
+                <h3>Операция покупки успешно подготовлена</h3>
+                <p>
+                    После подтверждения сделки система отправит запрос на backend-метод
+                    POST /api/trades/buy, создаст запись в истории транзакций и обновит состояние портфеля.
+                </p>
+
+                <div class="result-grid">
+                    <div>
+                        <span>Тип операции</span>
+                        <strong>BUY</strong>
+                    </div>
+
+                    <div>
+                        <span>Актив</span>
+                        <strong id="previewAssetTicker">Загрузка...</strong>
+                    </div>
+
+                    <div>
+                        <span>Количество</span>
+                        <strong id="previewBuyQty">10.00</strong>
+                    </div>
+
+                    <div>
+                        <span>Сумма</span>
+                        <strong id="previewBuyTotal">Загрузка...</strong>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+</main>
+
+<footer>
+    <p>Игровой симулятор инвестиционного рынка · Покупка валютного актива</p>
+</footer>
+
+<script src="/script.js"></script>
+<script>
+    initBuyAssetPage();
+</script>
+
+</body>
+</html>
