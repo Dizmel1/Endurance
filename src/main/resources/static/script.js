@@ -252,18 +252,6 @@ function goToCourseChartFromMain() {
 
 let currentMainChartIndex = 0;
 
-async function rotateMainChartRate() {
-    const ticker = COURSE_TICKERS[currentMainChartIndex];
-
-    await loadMainChartRate(ticker);
-
-    currentMainChartIndex++;
-
-    if (currentMainChartIndex >= COURSE_TICKERS.length) {
-        currentMainChartIndex = 0;
-    }
-}
-
 // =======================
 // Последняя котировка
 // =======================
