@@ -250,7 +250,6 @@ function goToCourseChartFromMain() {
     window.location.href = "/course-chart.html";
 }
 
-let currentMainChartIndex = 0;
 
 // =======================
 // Последняя котировка
@@ -664,24 +663,6 @@ async function loadTransactions() {
         `;
 
         return [];
-    }
-}
-
-// =======================
-// Обновление курса вручную
-// =======================
-
-async function updateUsdRubQuote() {
-    try {
-        await request("/api/admin/quotes/update-usd-rub", {
-            method: "POST"
-        });
-
-        alert("Курс USD/RUB обновлён");
-        await loadLatestQuoteByTicker("USD/RUB");
-    } catch (error) {
-        console.error("Ошибка обновления курса:", error);
-        alert("Ошибка обновления курса: " + error.message);
     }
 }
 
