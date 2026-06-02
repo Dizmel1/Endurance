@@ -3,22 +3,28 @@ spring:
     name: Endurance
 
   datasource:
-    username: postgres
-    password: root
-    url: jdbc:postgresql://localhost:5432/postgres
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/postgres}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:root}
     driver-class-name: org.postgresql.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
 
   session:
+    store-type: redis
+    timeout: 1h
     cookie:
       name: JSESSIONID
       path: /
-    timeout: 1h
-    data:
-      redis:
-        host: localhost
-        port: 6379
+
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST:localhost}
+      port: ${SPRING_DATA_REDIS_PORT:6379}
 kind: Application
