@@ -6,10 +6,17 @@ import com.example.Endurance.asset.AssetEntity;
 import com.example.Endurance.asset.AssetRepository;
 import com.example.Endurance.quote.QuoteEntity;
 import com.example.Endurance.quote.QuoteRepository;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.time.Duration;
 import java.time.LocalDateTime;
 
 @Component
@@ -18,6 +25,12 @@ public class DataInitializer implements CommandLineRunner {
     private final AssetCategoryRepository assetCategoryRepository;
     private final AssetRepository assetRepository;
     private final QuoteRepository quoteRepository;
+
+    private final HttpClient httpClient = HttpClient.newBuilder()
+            .connectTimeout(Duration.ofSeconds(10))
+            .build();
+
+    private final ObjectMapper objectMapper = new ObjectMapper();
 
     public DataInitializer(AssetCategoryRepository assetCategoryRepository,
                            AssetRepository assetRepository,
@@ -37,48 +50,83 @@ public class DataInitializer implements CommandLineRunner {
                     return assetCategoryRepository.save(category);
                 });
 
-        createAssetIfNotExists(
+        BigDecimal usdRubRate = loadRate("USD", "RUB", new BigDecimal("90.000000"));
+        BigDecimal eurRubRate = loadRate("EUR", "RUB", new BigDecimal("98.000000"));
+
+        createOrUpdateAsset(
                 currencyCategory,
                 "USD/RUB",
                 "Доллар США к российскому рублю",
-                new BigDecimal("90.000000"),
+                usdRubRate,
                 "RUB"
         );
 
-        createAssetIfNotExists(
+        createOrUpdateAsset(
                 currencyCategory,
                 "EUR/RUB",
                 "Евро к российскому рублю",
-                new BigDecimal("98.000000"),
+                eurRubRate,
                 "RUB"
         );
     }
 
-    private void createAssetIfNotExists(AssetCategoryEntity category,
-                                        String ticker,
-                                        String name,
-                                        BigDecimal startPrice,
-                                        String currency) {
+    private void createOrUpdateAsset(AssetCategoryEntity category,
+                                     String ticker,
+                                     String name,
+                                     BigDecimal price,
+                                     String currency) {
         AssetEntity asset = assetRepository.findByTicker(ticker)
                 .orElseGet(() -> {
                     AssetEntity newAsset = new AssetEntity();
                     newAsset.setCategory(category);
                     newAsset.setTicker(ticker);
                     newAsset.setName(name);
-                    newAsset.setStartBalance(startPrice);
                     newAsset.setCurrency(currency);
                     newAsset.setActive(true);
                     return assetRepository.save(newAsset);
                 });
 
-        boolean hasQuote = quoteRepository.findTopByAsset_TickerOrderByTsDesc(ticker).isPresent();
+        asset.setStartBalance(price);
+        asset.setActive(true);
+        assetRepository.save(asset);
 
-        if (!hasQuote) {
-            QuoteEntity quote = new QuoteEntity();
-            quote.setAsset(asset);
-            quote.setTs(LocalDateTime.now());
-            quote.setPrice(startPrice);
-            quoteRepository.save(quote);
+        QuoteEntity quote = new QuoteEntity();
+        quote.setAsset(asset);
+        quote.setTs(LocalDateTime.now());
+        quote.setPrice(price);
+        quoteRepository.save(quote);
+    }
+
+    private BigDecimal loadRate(String from, String to, BigDecimal fallback) {
+        try {
+            String url = "https://api.frankfurter.app/latest?from=" + from + "&to=" + to;
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create(url))
+                    .timeout(Duration.ofSeconds(10))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(
+                    request,
+                    HttpResponse.BodyHandlers.ofString()
+            );
+
+            if (response.statusCode() != 200) {
+                return fallback;
+            }
+
+            JsonNode root = objectMapper.readTree(response.body());
+            JsonNode rateNode = root.path("rates").path(to);
+
+            if (rateNode.isMissingNode() || !rateNode.isNumber()) {
+                return fallback;
+            }
+
+            return rateNode.decimalValue().setScale(6, java.math.RoundingMode.HALF_UP);
+
+        } catch (Exception e) {
+            return fallback;
         }
     }
 }
