@@ -75,25 +75,40 @@ public class DataInitializer implements CommandLineRunner {
                                      String name,
                                      BigDecimal price,
                                      String currency) {
+
+        if (price == null) {
+            if ("USD/RUB".equals(ticker)) {
+                price = new BigDecimal("90.000000");
+            } else if ("EUR/RUB".equals(ticker)) {
+                price = new BigDecimal("98.000000");
+            } else {
+                price = BigDecimal.ONE;
+            }
+        }
+
+        BigDecimal finalPrice = price;
+
         AssetEntity asset = assetRepository.findByTicker(ticker)
                 .orElseGet(() -> {
                     AssetEntity newAsset = new AssetEntity();
                     newAsset.setCategory(category);
                     newAsset.setTicker(ticker);
                     newAsset.setName(name);
+                    newAsset.setStartBalance(finalPrice);
                     newAsset.setCurrency(currency);
                     newAsset.setActive(true);
                     return assetRepository.save(newAsset);
                 });
 
-        asset.setStartBalance(price);
+        asset.setStartBalance(finalPrice);
+        asset.setCurrency(currency);
         asset.setActive(true);
         assetRepository.save(asset);
 
         QuoteEntity quote = new QuoteEntity();
         quote.setAsset(asset);
         quote.setTs(LocalDateTime.now());
-        quote.setPrice(price);
+        quote.setPrice(finalPrice);
         quoteRepository.save(quote);
     }
 
