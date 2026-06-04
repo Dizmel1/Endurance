@@ -8,9 +8,11 @@ public record TransactionResponse(
         Long portfolioId,
         Long assetId,
         String ticker,
+        String assetName,
         String type,
         BigDecimal qty,
         BigDecimal price,
+        BigDecimal amount,
         BigDecimal fee,
         LocalDateTime ts
 ) {

@@ -6,6 +6,7 @@ import com.example.Endurance.service.CurrentUserService;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Service
@@ -39,14 +40,17 @@ public class TransactionService {
     }
 
     private TransactionResponse toResponse(TransactionEntity transaction) {
+        BigDecimal amount = transaction.getQty().multiply(transaction.getPrice());
         return new TransactionResponse(
                 transaction.getId(),
                 transaction.getPortfolio().getId(),
                 transaction.getAsset().getId(),
                 transaction.getAsset().getTicker(),
+                transaction.getAsset().getName(),
                 transaction.getType(),
                 transaction.getQty(),
                 transaction.getPrice(),
+                amount,
                 transaction.getFee(),
                 transaction.getTs()
         );

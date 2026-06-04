@@ -8,4 +8,6 @@ public interface QuoteRepository extends JpaRepository<QuoteEntity, Long> {
     Optional<QuoteEntity> findTopByAsset_IdOrderByTsDesc(Long assetId);
     Optional<QuoteEntity> findTopByAsset_TickerOrderByTsDesc(String ticker);
     Optional<QuoteEntity> findTopByAssetIdOrderByTsDesc(Long id) ;
+
+    Optional<QuoteEntity> findTop20ByAsset_IdOrderByTsDesc(Long assetId);
 }

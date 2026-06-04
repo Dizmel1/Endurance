@@ -40,8 +40,8 @@ public class AuthService {
         portfolioEntity.setUser(entity);
         portfolioEntity.setName("Основной портфель");
         portfolioEntity.setCurrency("RUB");
-        portfolioEntity.setStartBalance(new BigDecimal("10000.00"));
-        portfolioEntity.setCashBalance(new BigDecimal("10000.00"));
+        portfolioEntity.setStartBalance(new BigDecimal("100000.00"));
+        portfolioEntity.setCashBalance(new BigDecimal("100000.00"));
         portfolioEntity.setCreatedAt(Instant.now());
 
         UserEntity saved = userRepository.save(entity);

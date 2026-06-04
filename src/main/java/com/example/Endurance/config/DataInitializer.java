@@ -50,8 +50,8 @@ public class DataInitializer implements CommandLineRunner {
                     return assetCategoryRepository.save(category);
                 });
 
-        BigDecimal usdRubRate = loadRate("USD", "RUB", new BigDecimal("90.000000"));
-        BigDecimal eurRubRate = loadRate("EUR", "RUB", new BigDecimal("98.000000"));
+        BigDecimal usdRubRate = loadRate("USD", "RUB", new BigDecimal("74.347796"));
+        BigDecimal eurRubRate = loadRate("EUR", "RUB", new BigDecimal("86.567272"));
 
         createOrUpdateAsset(
                 currencyCategory,
@@ -68,6 +68,70 @@ public class DataInitializer implements CommandLineRunner {
                 eurRubRate,
                 "RUB"
         );
+
+        AssetCategoryEntity stockCategory = assetCategoryRepository
+                .findByName("Акции")
+                .orElseGet(() -> {
+                    AssetCategoryEntity category = new AssetCategoryEntity();
+                    category.setName("Акции");
+                    return assetCategoryRepository.save(category);
+                });
+
+        createOrUpdateAsset(
+                stockCategory,
+                "AAPL",
+                "Apple Inc.",
+                new BigDecimal("27923.400000"),
+                "RUB"
+        );
+
+        createOrUpdateAsset(
+                stockCategory,
+                "MSFT",
+                "Microsoft Corporation",
+                new BigDecimal("38460.600000"),
+                "RUB"
+        );
+
+        createOrUpdateAsset(
+                stockCategory,
+                "TSLA",
+                "Tesla Inc.",
+                new BigDecimal("38133.000000"),
+                "RUB"
+        );
+
+        AssetCategoryEntity commodityCategory = assetCategoryRepository
+                .findByName("Сырьевые активы")
+                .orElseGet(() -> {
+                    AssetCategoryEntity category = new AssetCategoryEntity();
+                    category.setName("Сырьевые активы");
+                    return assetCategoryRepository.save(category);
+                });
+
+        createOrUpdateAsset(
+                commodityCategory,
+                "GOLD",
+                "Золото",
+                new BigDecimal("10500.000000"),
+                "RUB"
+        );
+
+        createOrUpdateAsset(
+                commodityCategory,
+                "SILVER",
+                "Серебро",
+                new BigDecimal("120.000000"),
+                "RUB"
+        );
+
+        createOrUpdateAsset(
+                commodityCategory,
+                "OIL",
+                "Нефть Brent",
+                new BigDecimal("7200.000000"),
+                "RUB"
+        );
     }
 
     private void createOrUpdateAsset(AssetCategoryEntity category,
@@ -76,40 +140,40 @@ public class DataInitializer implements CommandLineRunner {
                                      BigDecimal price,
                                      String currency) {
 
-        if (price == null) {
-            if ("USD/RUB".equals(ticker)) {
-                price = new BigDecimal("90.000000");
-            } else if ("EUR/RUB".equals(ticker)) {
-                price = new BigDecimal("98.000000");
-            } else {
-                price = BigDecimal.ONE;
-            }
-        }
-
-        BigDecimal finalPrice = price;
-
         AssetEntity asset = assetRepository.findByTicker(ticker)
                 .orElseGet(() -> {
                     AssetEntity newAsset = new AssetEntity();
                     newAsset.setCategory(category);
                     newAsset.setTicker(ticker);
                     newAsset.setName(name);
-                    newAsset.setStartBalance(finalPrice);
+                    newAsset.setStartBalance(price);
                     newAsset.setCurrency(currency);
                     newAsset.setActive(true);
                     return assetRepository.save(newAsset);
                 });
 
-        asset.setStartBalance(finalPrice);
+        asset.setCategory(category);
+        asset.setName(name);
         asset.setCurrency(currency);
         asset.setActive(true);
+
+        if (asset.getStartBalance() == null) {
+            asset.setStartBalance(price);
+        }
+
         assetRepository.save(asset);
 
-        QuoteEntity quote = new QuoteEntity();
-        quote.setAsset(asset);
-        quote.setTs(LocalDateTime.now());
-        quote.setPrice(finalPrice);
-        quoteRepository.save(quote);
+        boolean quoteExists = quoteRepository
+                .findTopByAsset_TickerOrderByTsDesc(ticker)
+                .isPresent();
+
+        if (!quoteExists) {
+            QuoteEntity quote = new QuoteEntity();
+            quote.setAsset(asset);
+            quote.setTs(LocalDateTime.now());
+            quote.setPrice(price);
+            quoteRepository.save(quote);
+        }
     }
 
     private BigDecimal loadRate(String from, String to, BigDecimal fallback) {

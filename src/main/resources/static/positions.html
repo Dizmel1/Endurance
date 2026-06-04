@@ -103,6 +103,40 @@
 
 </main>
 
+<div id="sellAssetModal" class="sell-modal hidden">
+    <div class="sell-modal-content">
+        <h3>Продажа актива</h3>
+
+        <input type="hidden" id="sellAssetId">
+
+        <p>
+            Актив:
+            <strong id="sellAssetTicker">-</strong>
+        </p>
+
+        <p>
+            Доступно для продажи:
+            <strong id="sellAssetAvailableQty">0</strong>
+        </p>
+
+        <label for="sellQty">Количество для продажи</label>
+        <input
+                type="number"
+                id="sellQty"
+                min="0.000001"
+                step="0.000001"
+                placeholder="Введите количество"
+        >
+
+        <p id="sellAssetMessage" class="form-message"></p>
+
+        <div class="modal-actions">
+            <button class="confirm-btn" onclick="sellAsset()">Продать</button>
+            <button class="outline-btn" onclick="closeSellAssetModal()">Отмена</button>
+        </div>
+    </div>
+</div>
+
 <script src="/script.js"></script>
 <script>
     initPositionsPage();

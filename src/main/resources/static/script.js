@@ -12,18 +12,89 @@ async function request(url, options = {}) {
         ...options
     });
 
-    if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || `Ошибка запроса: ${response.status}`);
-    }
-
     const contentType = response.headers.get("content-type");
+    let responseBody = null;
 
     if (contentType && contentType.includes("application/json")) {
-        return await response.json();
+        responseBody = await response.json();
+    } else {
+        responseBody = await response.text();
     }
 
-    return await response.text();
+    if (!response.ok) {
+        throw new Error(extractErrorMessage(responseBody, response.status));
+    }
+
+    return responseBody;
+}
+
+function extractErrorMessage(errorBody, status) {
+    if (!errorBody) {
+        return getDefaultErrorMessage(status);
+    }
+
+    if (typeof errorBody === "string") {
+        try {
+            const parsed = JSON.parse(errorBody);
+            return extractErrorMessage(parsed, status);
+        } catch (e) {
+            return errorBody || getDefaultErrorMessage(status);
+        }
+    }
+
+    if (errorBody.message) {
+        return errorBody.message;
+    }
+
+    if (errorBody.error && errorBody.error !== "Internal Server Error") {
+        return errorBody.error;
+    }
+
+    if (errorBody.status === 400) {
+        return "Проверьте введённые данные";
+    }
+
+    if (errorBody.status === 401) {
+        return "Необходимо войти в аккаунт";
+    }
+
+    if (errorBody.status === 403) {
+        return "Недостаточно прав для выполнения действия";
+    }
+
+    if (errorBody.status === 404) {
+        return "Запрашиваемые данные не найдены";
+    }
+
+    if (errorBody.status === 500) {
+        return "На сервере произошла ошибка. Проверьте данные операции или попробуйте позже";
+    }
+
+    return getDefaultErrorMessage(status);
+}
+
+function getDefaultErrorMessage(status) {
+    if (status === 400) {
+        return "Проверьте введённые данные";
+    }
+
+    if (status === 401) {
+        return "Необходимо войти в аккаунт";
+    }
+
+    if (status === 403) {
+        return "Недостаточно прав для выполнения действия";
+    }
+
+    if (status === 404) {
+        return "Данные не найдены";
+    }
+
+    if (status === 500) {
+        return "На сервере произошла ошибка";
+    }
+
+    return "Ошибка запроса: " + status;
 }
 
 // =======================
@@ -52,7 +123,6 @@ async function registerUser() {
 
         localStorage.setItem("currentUser", JSON.stringify(user));
 
-        alert("Регистрация выполнена успешно");
         window.location.href = "/index.html";
     } catch (error) {
         console.error(error);
@@ -84,7 +154,6 @@ async function loginUser() {
 
         localStorage.setItem("currentUser", JSON.stringify(user));
 
-        alert("Вход выполнен успешно");
         window.location.href = "/index.html";
     } catch (error) {
         console.error(error);
@@ -427,7 +496,6 @@ async function buyAsset() {
 
         localStorage.setItem("lastTradeResult", JSON.stringify(result));
 
-        alert("Покупка выполнена успешно");
         window.location.href = "/deal-result.html";
     } catch (error) {
         console.error("Ошибка покупки:", error);
@@ -639,11 +707,12 @@ async function loadTransactions() {
 
         transactions.forEach(transaction => {
             const row = document.createElement("tr");
+            const transactionTypeClass = transaction.type === "SELL" ? "sell" : "buy";
 
             row.innerHTML = `
                 <td>${formatDateTime(transaction.ts)}</td>
                 <td>${transaction.ticker}</td>
-                <td><span class="badge buy">${transaction.type}</span></td>
+                <td><span class="badge ${transactionTypeClass}">${transaction.type}</span></td>
                 <td>${formatNumber(transaction.qty)}</td>
                 <td>${formatNumber(transaction.price)}</td>
                 <td>${formatNumber(transaction.fee)}</td>
@@ -847,8 +916,331 @@ async function initProfilePage() {
 }
 
 async function initCourseChartPage() {
+    await loadCurrentUser();
+
     const assetId = localStorage.getItem("selectedAssetId") || "1";
-    await loadLatestQuoteByAssetId(assetId);
+
+    localStorage.setItem("selectedAssetId", assetId);
+
+    const latestQuote = await loadLatestQuoteByAssetId(assetId);
+
+    if (!latestQuote) {
+        setText("chartAssetTicker", "Котировка не найдена");
+        setText("chartAssetName", "Не удалось получить данные выбранного актива");
+        setText("chartLatestPrice", "-");
+        setText("chartLatestTime", "Нет данных");
+        setText("chartChangePercent", "-");
+        setText("chartQuotesCount", "0");
+        renderEmptyQuotesTable();
+        renderEmptyChart("Нет данных для построения графика");
+        return;
+    }
+
+    let quotes = await loadQuoteHistoryByAssetId(assetId);
+
+    if (!quotes || quotes.length === 0) {
+        quotes = [latestQuote];
+    }
+
+    quotes.sort((a, b) => new Date(a.ts) - new Date(b.ts));
+
+    updateCourseChartInfo(latestQuote, quotes);
+    renderQuotesChart(quotes);
+    renderQuotesTable(quotes);
+}
+
+async function loadQuoteHistoryByAssetId(assetId) {
+    try {
+        return await request(`/api/quotes/history/asset/${assetId}`, {
+            method: "GET"
+        });
+    } catch (error) {
+        console.warn("История котировок не найдена, будет использована последняя котировка:", error);
+        return [];
+    }
+}
+
+function updateCourseChartInfo(latestQuote, quotes) {
+    const firstQuote = quotes[0];
+    const lastQuote = quotes[quotes.length - 1];
+
+    const firstPrice = Number(firstQuote.price || 0);
+    const lastPrice = Number(lastQuote.price || latestQuote.price || 0);
+
+    let changePercent = 0;
+
+    if (firstPrice > 0) {
+        changePercent = ((lastPrice - firstPrice) / firstPrice) * 100;
+    }
+
+    const changeClass = getProfitClass(changePercent);
+
+    setText("chartAssetTicker", latestQuote.ticker || "-");
+    setText("chartAssetName", latestQuote.assetName || "Инвестиционный актив");
+    setText("chartLatestPrice", formatNumber(lastPrice));
+    setText("chartLatestTime", lastQuote.ts ? `Обновлено: ${formatDateTime(lastQuote.ts)}` : "Нет даты обновления");
+
+    setText("chartChangePercent", formatProfit(changePercent) + "%");
+    setText("chartQuotesCount", quotes.length);
+
+    setText("chartTitle", `Динамика котировки ${latestQuote.ticker || ""}`);
+    setText("chartInnerTicker", latestQuote.ticker || "-");
+    setText("chartInnerDescription", latestQuote.assetName || "История сохранённых котировок");
+    setText("chartCurrentValue", `${formatNumber(lastPrice)} ${latestQuote.currency || ""}`);
+
+    const changeElement = document.getElementById("chartChangePercent");
+
+    if (changeElement) {
+        changeElement.className = "big " + changeClass;
+    }
+
+    const buyButton = document.getElementById("chartBuyButton");
+
+    if (buyButton) {
+        buyButton.textContent = `Купить ${latestQuote.ticker || "актив"}`;
+    }
+}
+
+function renderQuotesTable(quotes) {
+    const tbody = document.getElementById("quotesTableBody");
+
+    if (!tbody) {
+        return;
+    }
+
+    tbody.innerHTML = "";
+
+    if (!quotes || quotes.length === 0) {
+        renderEmptyQuotesTable();
+        return;
+    }
+
+    const reversedQuotes = [...quotes].reverse();
+
+    reversedQuotes.forEach(quote => {
+        const row = document.createElement("tr");
+
+        row.innerHTML = `
+            <td>${formatDateTime(quote.ts)}</td>
+            <td>${quote.ticker || "-"}</td>
+            <td>${formatNumber(quote.price)}</td>
+            <td>База данных</td>
+        `;
+
+        tbody.appendChild(row);
+    });
+}
+
+function renderEmptyQuotesTable() {
+    const tbody = document.getElementById("quotesTableBody");
+
+    if (!tbody) {
+        return;
+    }
+
+    tbody.innerHTML = `
+        <tr>
+            <td colspan="4">Котировки по выбранному активу пока отсутствуют</td>
+        </tr>
+    `;
+}
+
+function renderQuotesChart(quotes) {
+    const svg = document.getElementById("quotesSvg");
+    const labels = document.getElementById("chartLabels");
+
+    if (!svg) {
+        return;
+    }
+
+    if (!quotes || quotes.length === 0) {
+        renderEmptyChart("Нет данных для построения графика");
+        return;
+    }
+
+    if (quotes.length === 1) {
+        renderSinglePointChart(quotes[0]);
+        return;
+    }
+
+    const prices = quotes.map(quote => Number(quote.price || 0));
+    const minPrice = Math.min(...prices);
+    const maxPrice = Math.max(...prices);
+
+    const chartLeft = 70;
+    const chartRight = 840;
+    const chartTop = 40;
+    const chartBottom = 260;
+
+    const chartWidth = chartRight - chartLeft;
+    const chartHeight = chartBottom - chartTop;
+
+    const priceRange = maxPrice - minPrice || 1;
+
+    const points = quotes.map((quote, index) => {
+        const x = chartLeft + (index * chartWidth) / (quotes.length - 1);
+        const price = Number(quote.price || 0);
+        const y = chartBottom - ((price - minPrice) / priceRange) * chartHeight;
+
+        return {
+            x,
+            y,
+            price,
+            ts: quote.ts
+        };
+    });
+
+    const polylinePoints = points
+        .map(point => `${point.x.toFixed(2)},${point.y.toFixed(2)}`)
+        .join(" ");
+
+    const circles = points
+        .map(point => `
+            <circle cx="${point.x.toFixed(2)}"
+                    cy="${point.y.toFixed(2)}"
+                    r="5"
+                    class="chart-point">
+                <title>${formatNumber(point.price)} · ${formatDateTime(point.ts)}</title>
+            </circle>
+        `)
+        .join("");
+
+    svg.innerHTML = `
+        <line x1="50" y1="20" x2="50" y2="280" class="axis-line"/>
+        <line x1="50" y1="280" x2="860" y2="280" class="axis-line"/>
+
+        <line x1="50" y1="80" x2="860" y2="80" class="grid-line"/>
+        <line x1="50" y1="140" x2="860" y2="140" class="grid-line"/>
+        <line x1="50" y1="200" x2="860" y2="200" class="grid-line"/>
+
+        <text x="10" y="45" class="chart-text">${formatShortNumber(maxPrice)}</text>
+        <text x="10" y="165" class="chart-text">${formatShortNumber((maxPrice + minPrice) / 2)}</text>
+        <text x="10" y="265" class="chart-text">${formatShortNumber(minPrice)}</text>
+
+        <polyline points="${polylinePoints}" class="chart-line"/>
+
+        ${circles}
+    `;
+
+    if (labels) {
+        labels.innerHTML = "";
+
+        const labelIndexes = getChartLabelIndexes(quotes.length);
+
+        labelIndexes.forEach(index => {
+            const span = document.createElement("span");
+            span.textContent = formatShortDateTime(quotes[index].ts);
+            labels.appendChild(span);
+        });
+    }
+}
+
+function renderSinglePointChart(quote) {
+    const svg = document.getElementById("quotesSvg");
+    const labels = document.getElementById("chartLabels");
+
+    if (!svg) {
+        return;
+    }
+
+    const price = Number(quote.price || 0);
+
+    svg.innerHTML = `
+        <line x1="50" y1="20" x2="50" y2="280" class="axis-line"/>
+        <line x1="50" y1="280" x2="860" y2="280" class="axis-line"/>
+
+        <line x1="50" y1="140" x2="860" y2="140" class="grid-line"/>
+
+        <text x="10" y="145" class="chart-text">${formatShortNumber(price)}</text>
+
+        <circle cx="455" cy="140" r="7" class="chart-point">
+            <title>${formatNumber(price)} · ${formatDateTime(quote.ts)}</title>
+        </circle>
+
+        <text x="335" y="185" class="chart-text">
+            Недостаточно данных для линии, показана последняя котировка
+        </text>
+    `;
+
+    if (labels) {
+        labels.innerHTML = `<span>${formatShortDateTime(quote.ts)}</span>`;
+    }
+}
+
+function renderEmptyChart(message) {
+    const svg = document.getElementById("quotesSvg");
+    const labels = document.getElementById("chartLabels");
+
+    if (!svg) {
+        return;
+    }
+
+    svg.innerHTML = `
+        <line x1="50" y1="20" x2="50" y2="280" class="axis-line"/>
+        <line x1="50" y1="280" x2="860" y2="280" class="axis-line"/>
+        <text x="320" y="160" class="chart-text">${message}</text>
+    `;
+
+    if (labels) {
+        labels.innerHTML = `<span>Нет данных</span>`;
+    }
+}
+
+function getChartLabelIndexes(length) {
+    if (length <= 1) {
+        return [0];
+    }
+
+    if (length <= 5) {
+        return Array.from({ length }, (_, index) => index);
+    }
+
+    return [
+        0,
+        Math.floor(length / 4),
+        Math.floor(length / 2),
+        Math.floor((length * 3) / 4),
+        length - 1
+    ];
+}
+
+function formatShortNumber(value) {
+    const number = Number(value || 0);
+
+    if (Number.isNaN(number)) {
+        return "0";
+    }
+
+    if (Math.abs(number) >= 1000) {
+        return number.toFixed(0);
+    }
+
+    return number.toFixed(2);
+}
+
+function formatShortDateTime(value) {
+    if (!value) {
+        return "-";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return value;
+    }
+
+    return date.toLocaleString("ru-RU", {
+        day: "2-digit",
+        month: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit"
+    });
+}
+
+function goToBuySelectedAsset() {
+    const assetId = localStorage.getItem("selectedAssetId") || "1";
+    localStorage.setItem("selectedAssetId", assetId);
+    window.location.href = "/buy-asset.html";
 }
 
 function getProfitClass(value) {
@@ -944,14 +1336,22 @@ async function loadPositions() {
                 </td>
 
                 <td>
-                    <button class="small-action-btn" onclick="goToBuyAssetFromPosition(${position.assetId})">
-                        Купить ещё
-                    </button>
+                    <div class="position-actions">
+                        <button class="small-action-btn" onclick="goToBuyAssetFromPosition(${position.assetId})">
+                            Купить ещё
+                        </button>
+                
+                        <button class="small-action-btn sell-action-btn"
+                                onclick="openSellAssetModal(${position.assetId}, '${position.ticker}', ${position.qty})">
+                            Продать
+                        </button>
+                    </div>
                 </td>
             `;
 
             tbody.appendChild(row);
         });
+
 
         setText("positionsCount", positions.length);
         setText("positionsTotalValue", formatNumber(totalValue));
@@ -984,6 +1384,82 @@ async function loadPositions() {
 function goToBuyAssetFromPosition(assetId) {
     localStorage.setItem("selectedAssetId", assetId);
     window.location.href = "/buy-asset.html";
+}
+
+function openSellAssetModal(assetId, ticker, maxQty) {
+    const modal = document.getElementById("sellAssetModal");
+
+    if (!modal) {
+        alert("Форма продажи не найдена на странице");
+        return;
+    }
+
+    const assetIdInput = document.getElementById("sellAssetId");
+    const tickerElement = document.getElementById("sellAssetTicker");
+    const availableQtyElement = document.getElementById("sellAssetAvailableQty");
+    const qtyInput = document.getElementById("sellQty");
+
+    assetIdInput.value = assetId;
+    tickerElement.textContent = ticker;
+    availableQtyElement.textContent = formatNumber(maxQty);
+
+    qtyInput.value = "";
+    qtyInput.max = maxQty;
+
+    setText("sellAssetMessage", "");
+
+    modal.classList.remove("hidden");
+}
+
+function closeSellAssetModal() {
+    const modal = document.getElementById("sellAssetModal");
+
+    if (modal) {
+        modal.classList.add("hidden");
+    }
+}
+
+async function sellAsset() {
+    const assetId = Number(document.getElementById("sellAssetId")?.value || 0);
+    const qty = Number(document.getElementById("sellQty")?.value || 0);
+    const maxQty = Number(document.getElementById("sellQty")?.max || 0);
+
+    if (!assetId) {
+        setText("sellAssetMessage", "Не выбран актив для продажи");
+        return;
+    }
+
+    if (!qty || qty <= 0) {
+        setText("sellAssetMessage", "Введите количество больше нуля");
+        return;
+    }
+
+    if (maxQty && qty > maxQty) {
+        setText("sellAssetMessage", "Нельзя продать больше, чем есть в портфеле");
+        return;
+    }
+
+    try {
+        const result = await request("/api/trades/sell", {
+            method: "POST",
+            body: JSON.stringify({
+                assetId: assetId,
+                qty: qty
+            })
+        });
+
+        localStorage.setItem("lastTradeResult", JSON.stringify(result));
+
+
+        closeSellAssetModal();
+
+        await loadPositions();
+        await loadPortfolio();
+
+    } catch (error) {
+        console.error("Ошибка продажи:", error);
+        setText("sellAssetMessage", "Ошибка продажи: " + error.message);
+    }
 }
 
 // =======================

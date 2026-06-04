@@ -30,6 +30,8 @@ public class QuoteService {
                 quote.getId(),
                 quote.getAsset().getId(),
                 quote.getAsset().getTicker(),
+                quote.getAsset().getName(),
+                quote.getAsset().getCurrency(),
                 quote.getPrice(),
                 quote.getTs()
         );

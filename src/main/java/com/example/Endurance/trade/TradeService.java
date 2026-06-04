@@ -8,6 +8,7 @@ import com.example.Endurance.position.PositionEntity;
 import com.example.Endurance.position.PositionRepository;
 import com.example.Endurance.quote.QuoteEntity;
 import com.example.Endurance.quote.QuoteRepository;
+import com.example.Endurance.service.CurrentUserService;
 import com.example.Endurance.transaction.TransactionEntity;
 import com.example.Endurance.transaction.TransactionRepository;
 import com.example.Endurance.user.UserEntity;
@@ -28,6 +29,7 @@ public class TradeService {
     private final QuoteRepository quoteRepository;
     private final PositionRepository positionRepository;
     private final TransactionRepository transactionRepository;
+    private final CurrentUserService currentUserService;
 
     public TradeService(
             UserRepository userRepository,
@@ -35,7 +37,7 @@ public class TradeService {
             AssetRepository assetRepository,
             QuoteRepository quoteRepository,
             PositionRepository positionRepository,
-            TransactionRepository transactionRepository
+            TransactionRepository transactionRepository, CurrentUserService currentUserService
     ) {
         this.userRepository = userRepository;
         this.portfolioRepository = portfolioRepository;
@@ -43,6 +45,7 @@ public class TradeService {
         this.quoteRepository = quoteRepository;
         this.positionRepository = positionRepository;
         this.transactionRepository = transactionRepository;
+        this.currentUserService = currentUserService;
     }
 
     @Transactional
@@ -126,5 +129,59 @@ public class TradeService {
                 fee,
                 savedTransaction.getTs()
         );
+    }
+
+    @Transactional
+    public TransactionEntity sellAsset(SellAssetRequest request) {
+        UserEntity user = currentUserService.getCurrentUser();
+
+        PortfolioEntity portfolio = portfolioRepository.findByUserId(user.getId())
+                .orElseThrow(() -> new RuntimeException("Портфель пользователя не найден"));
+
+        AssetEntity asset = assetRepository.findById(request.getAssetId())
+                .orElseThrow(() -> new RuntimeException("Актив не найден"));
+
+        PositionEntity position = positionRepository
+                .findByPortfolio_IdAndAsset_Id(portfolio.getId(), asset.getId())
+                .orElseThrow(() -> new RuntimeException("У пользователя нет данного актива"));
+
+        BigDecimal sellQty = request.getQty();
+
+        if (sellQty.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new RuntimeException("Количество для продажи должно быть больше 0");
+        }
+
+        if (position.getQty().compareTo(sellQty) < 0) {
+            throw new RuntimeException("Недостаточно актива для продажи");
+        }
+
+        QuoteEntity quote = quoteRepository.findTopByAsset_TickerOrderByTsDesc(asset.getTicker())
+                .orElseThrow(() -> new RuntimeException("Котировка для актива не найдена"));
+
+        BigDecimal price = quote.getPrice();
+        BigDecimal amount = price.multiply(sellQty);
+
+        portfolio.setCashBalance(portfolio.getCashBalance().add(amount));
+        portfolioRepository.save(portfolio);
+
+        BigDecimal newQty = position.getQty().subtract(sellQty);
+
+        if (newQty.compareTo(BigDecimal.ZERO) == 0) {
+            positionRepository.delete(position);
+        } else {
+            position.setQty(newQty);
+            positionRepository.save(position);
+        }
+
+        TransactionEntity transaction = new TransactionEntity();
+        transaction.setPortfolio(portfolio);
+        transaction.setAsset(asset);
+        transaction.setType("SELL");
+        transaction.setQty(sellQty);
+        transaction.setPrice(price);
+        transaction.setFee(BigDecimal.ZERO);
+        transaction.setTs(LocalDateTime.now());
+
+        return transactionRepository.save(transaction);
     }
 }

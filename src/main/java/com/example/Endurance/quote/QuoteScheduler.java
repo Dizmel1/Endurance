@@ -12,10 +12,10 @@ public class QuoteScheduler {
         this.quoteUpdateService = quoteUpdateService;
     }
 
-    @Scheduled(fixedRate = 60 * 60 * 1000)
-    public void updateUsdRubQuotes() {
-        quoteUpdateService.updateCurrencyQuote("USD/RUB", "USD", "RUB");
-        quoteUpdateService.updateCurrencyQuote("EUR/USD", "EUR", "USD");
-        quoteUpdateService.updateCurrencyQuote("EUR/RUB", "EUR", "RUB");
-    }
+//    @Scheduled(fixedRate = 60 * 60 * 1000)
+//    public void updateUsdRubQuotes() {
+//        quoteUpdateService.updateCurrencyQuote("USD/RUB", "USD", "RUB");
+//        quoteUpdateService.updateCurrencyQuote("EUR/USD", "EUR", "USD");
+//        quoteUpdateService.updateCurrencyQuote("EUR/RUB", "EUR", "RUB");
+//    }
 }

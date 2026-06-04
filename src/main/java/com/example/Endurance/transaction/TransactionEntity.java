@@ -45,5 +45,4 @@ public class TransactionEntity {
     public TransactionEntity() {
     }
 
-    // getters/setters
 }

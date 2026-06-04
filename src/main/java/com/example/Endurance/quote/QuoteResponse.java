@@ -7,6 +7,8 @@ public record QuoteResponse(
         Long id,
         Long assetId,
         String ticker,
+        String assetName,
+        String currency,
         BigDecimal price,
         LocalDateTime ts
 ) {
